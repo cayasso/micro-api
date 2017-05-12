@@ -129,6 +129,25 @@ test('passes request body to handler', async t => {
   t.deepEqual(foosBody.foo, 'bar')
 })
 
+test('passes request query string to handler', async t => {
+  const api = microApi([
+    {
+      method: 'get',
+      path: '/foos',
+      handler: ({ query }) => query
+    }
+  ])
+
+  const router = micro(api)
+  const url = await listen(router)
+
+  const qsResponse = await request.get(`${url}/foos?a=foo&b=bar`, testRequestOptions)
+  const qsBody = qsResponse.body
+
+  t.deepEqual(qsResponse.statusCode, 200)
+  t.deepEqual(qsBody, { a: 'foo', b: 'bar' })
+})
+
 test('passes URL params to handler', async t => {
   const api = microApi([
     {

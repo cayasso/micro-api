@@ -2,6 +2,7 @@ require('babel-polyfill')
 
 const pathMatch = require('path-match')
 const { json, send } = require('micro')
+const { parse } = require('url')
 
 const configureRouter = routes => {
   const pathMatcher = pathMatch()
@@ -52,7 +53,8 @@ const microApi = routes => {
   const lookup = configureRouter(routes)
 
   return async (req, res) => {
-    const route = lookup(req.url, req.method)
+    const { query, pathname } = parse(req.url, true)
+    const route = lookup(pathname, req.method)
 
     if (!route) {
       return sendPageNotFound(req, res)
@@ -70,6 +72,7 @@ const microApi = routes => {
       const resBody = await route.handler({
         res,
         req,
+        query,
         body: reqBody,
         params: route.params,
         headers: req.headers
